@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.group29.localtreasury.R
 import com.group29.localtreasury.Util
+import com.group29.localtreasury.database.FirebaseDatabase
 import com.group29.localtreasury.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {
@@ -60,6 +61,13 @@ class SettingsFragment : Fragment() {
         imageView.setOnClickListener(){
             galleryApp()
         }
+
+        val firebaseDatabase = FirebaseDatabase()
+//        val numbs = arrayOf(1,2,3,4,5,6,7,8,9,10)
+//        for (i in numbs) {
+//            firebaseDatabase.adddata(i)
+//        }
+        firebaseDatabase.getdata()
 
 
         return root
