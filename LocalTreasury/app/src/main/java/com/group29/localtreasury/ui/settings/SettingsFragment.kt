@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.group29.localtreasury.R
 import com.group29.localtreasury.Util
+import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
 import com.group29.localtreasury.databinding.FragmentSettingsBinding
 
@@ -67,7 +68,13 @@ class SettingsFragment : Fragment() {
 //        for (i in numbs) {
 //            firebaseDatabase.adddata(i)
 //        }
-        firebaseDatabase.getdata()
+        val chatObject = ChatObject()
+        chatObject.user = "BG"
+        chatObject.reciever = "Seller"
+        chatObject.chatList.add("Hi")
+        chatObject.chatList.add("bye")
+        firebaseDatabase.adddata(chatObject)
+        firebaseDatabase.getChats()
 
 
         return root
