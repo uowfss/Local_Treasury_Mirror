@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "528249232996",
+    "project_id": "localtreasury-890e0",
+    "storage_bucket": "localtreasury-890e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:528249232996:android:2d91cd19afbc89ced04971",
+        "android_client_info": {
+          "package_name": "com.group29.localtreasury"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwQ9UgaQwfzQV5hWypWUWhBPAiNT-RmjM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
