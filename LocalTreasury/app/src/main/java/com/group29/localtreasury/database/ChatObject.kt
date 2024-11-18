@@ -1,7 +1,8 @@
 package com.group29.localtreasury.database
 
 class ChatObject {
-    var user:String = ""
-    var reciever: String = ""
-    var chatList: MutableList<String> = mutableListOf()
+    var senderID:String = ""
+    var recieverID: String = ""
+    var participants: MutableList<String> = mutableListOf()
+    var messages: MutableList<String> = mutableListOf()
 }
