@@ -49,7 +49,7 @@ class FirebaseDatabase {
     // Sign In Function
     /*
     firebaseDatabase.signIn(email, password) { userId ->
-        if (userId != null) {
+        if (userId != LOGINFAILED) {
             //Login
         } else {
             // Wrong Credintels

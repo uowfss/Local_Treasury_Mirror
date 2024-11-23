@@ -12,3 +12,10 @@ class ItemPostObject {
     lateinit var latLng: LatLng
     var ImageURL: String = ""
 }
+
+/*
+Glide.with(this)
+            .load(ItemPostObject.ImageURL)
+            .placeholder(R.drawable.placeholder_image)
+            .into(imageview)
+ */
