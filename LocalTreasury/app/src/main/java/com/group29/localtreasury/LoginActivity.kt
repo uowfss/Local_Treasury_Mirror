@@ -26,9 +26,7 @@ class LoginActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        //TODO: config after firebase is set up, line 31, 42, 60, and 68
-        //auth = FirebaseAuth.getInstance()
+        auth = FirebaseAuth.getInstance()
 
         val loginLayout = findViewById<View>(R.id.login_layout)
         val emailEditText = findViewById<EditText>(R.id.email_login_input)
@@ -37,9 +35,9 @@ class LoginActivity : AppCompatActivity() {
         val loginButton = findViewById<Button>(R.id.login_btn)
 
         loginButton.setOnClickListener {
-                val email = emailEditText.text.toString()
-                val password = passwordEditText.text.toString()
-                //loginWithEmail(email, password)
+            val email = emailEditText.text.toString()
+            val password = passwordEditText.text.toString()
+            loginWithEmail(email, password)
         }
 
         signupButton.setOnClickListener {
@@ -57,26 +55,38 @@ class LoginActivity : AppCompatActivity() {
     public override fun onStart() {
         super.onStart()
         // Check if user is signed in (non-null) and update UI accordingly.
-        //val currentUser = auth.currentUser
-        //if (currentUser != null) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
             // If the user is already signed in, navigate to the main activity
-        //    navigateToMainActivity()
+            navigateToMainActivity()
         }
     }
 
-    /**
     private fun loginWithEmail(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     //login successful, will go to main activity
-                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                    navigateToMainActivity()
+                    val user = auth.currentUser
+                    if (user != null && user.isEmailVerified) {
+                        // Email is verified
+                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                        navigateToMainActivity()
+                    } else {
+                        // Email is not verified
+                        Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show()
+                        auth.signOut() // Sign out the user to prevent an unverified session
+                    }
                 } else {
                     //login failed, stay in login activity
                     Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show()
                 }
             }
     }
-    **/
+
+    private fun navigateToMainActivity(){
+
+    }
+}
+
 
