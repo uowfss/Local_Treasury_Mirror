@@ -52,6 +52,7 @@ class ChatsFragment : Fragment() {
             else{
                 recieverID = allChats[position].recieverID
             }
+            recieverID = "123456789"
             val intent = Intent(activity,DirectChat::class.java)
             intent.putExtra("USERID", userID)
             intent.putExtra("RECIEVERID", recieverID)
