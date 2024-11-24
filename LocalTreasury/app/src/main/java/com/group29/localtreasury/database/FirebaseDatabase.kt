@@ -108,7 +108,6 @@ class FirebaseDatabase {
             .whereEqualTo("sellerID", userId)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
-                    Log.w("Firestore", "Listen failed.", e)
                     return@addSnapshotListener
                 }
 
@@ -130,10 +129,9 @@ class FirebaseDatabase {
         // Save or update the chat document
         chatRef.set(chatMessage)
             .addOnSuccessListener {
-                Log.d("Firestore", "Chat created/updated successfully")
+                Log.d("BG", "Chat created/updated successfully")
             }
             .addOnFailureListener { e ->
-                Log.w("Firestore", "Error sending chat message", e)
             }
     }
 
@@ -151,15 +149,12 @@ class FirebaseDatabase {
             .whereArrayContains("participants", userID)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
-                    Log.w("Firestore", "Listen failed.", e)
                     return@addSnapshotListener
                 }
-
                 if (snapshot != null && !snapshot.isEmpty) {
                     val updatedChats = snapshot.documents.mapNotNull { it.toObject(ChatObject::class.java) }
                     callback(updatedChats)
                 } else {
-                    Log.d("BGisEmpty","Empty snapshot")
                     callback(emptyList())
                 }
             }
@@ -173,7 +168,6 @@ class FirebaseDatabase {
             .document(getChatId(senderID,recieverID))
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
-                    Log.w("Firestore", "Listen failed.", e)
                     callback(null)
                     return@addSnapshotListener
                 }
@@ -184,6 +178,34 @@ class FirebaseDatabase {
                 } else {
                     callback(null)
                 }
+            }
+    }
+
+    fun deleteChat(userID: String, receiverID: String, callback: (Boolean) -> Unit) {
+        val chatId = getChatId(userID, receiverID)
+        val chatRef = db.collection("chats").document(chatId)
+        chatRef.delete()
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener { e ->
+                callback(false)
+            }
+    }
+
+    fun getUsername(ID: String, callback: (String?) -> Unit) {
+        val users = db.collection("users").document(ID)
+        users.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val username = document.getString("username")
+                    callback(username)
+                } else {
+                    callback(null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                callback(null)
             }
     }
 
