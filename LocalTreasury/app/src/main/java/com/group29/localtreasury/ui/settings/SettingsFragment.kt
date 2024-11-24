@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,8 +15,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.logging.type.LogSeverityProto
 import com.group29.localtreasury.R
 import com.group29.localtreasury.Util
+import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
 import com.group29.localtreasury.databinding.FragmentSettingsBinding
 
@@ -62,13 +65,18 @@ class SettingsFragment : Fragment() {
             galleryApp()
         }
 
-        val firebaseDatabase = FirebaseDatabase()
-//        val numbs = arrayOf(1,2,3,4,5,6,7,8,9,10)
-//        for (i in numbs) {
-//            firebaseDatabase.adddata(i)
-//        }
-        firebaseDatabase.getdata()
-
+//        val firebaseDatabase = FirebaseDatabase()
+//        val chatObject = ChatObject()
+//        chatObject.user = "BG"
+//        chatObject.reciever = "Seller"
+//        chatObject.chatList.add("Hi")
+//        chatObject.chatList.add("bye")
+//        firebaseDatabase.adddata(chatObject)
+//        firebaseDatabase.getChats()
+//
+//        firebaseDatabase.createAccount("Birfatehjit@gmail.com","123456789")
+//
+//        firebaseDatabase.signIn("Birfatehjit@gmail.com","123456789")
 
         return root
     }
