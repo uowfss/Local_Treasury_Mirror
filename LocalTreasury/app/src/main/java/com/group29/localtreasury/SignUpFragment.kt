@@ -9,7 +9,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.group29.localtreasury.database.FirebaseDatabase
 
 class SignUpFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
@@ -27,13 +30,34 @@ class SignUpFragment : Fragment() {
 
         val emailEditText = view.findViewById<EditText>(R.id.email_signup_input)
         val passwordEditText = view.findViewById<EditText>(R.id.password_signup_input)
+        val usernameEditText = view.findViewById<EditText>(R.id.username_signup_input)
         val submitSignUpButton = view.findViewById<Button>(R.id.signup_submit_btn)
         val cancelSignUpButton = view.findViewById<Button>(R.id.signup_cancel_btn)
 
         submitSignUpButton.setOnClickListener{
             val email = emailEditText.text.toString()
             val password = passwordEditText.text.toString()
-            signUpWithEmail(email, password)
+            val username = usernameEditText.text.toString()
+
+            if (username.isEmpty()) {
+                usernameEditText.error = "Username cannot be empty"
+                usernameEditText.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (email.isEmpty()) {
+                emailEditText.error = "Email cannot be empty"
+                emailEditText.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (password.isEmpty()) {
+                passwordEditText.error = "Password cannot be empty"
+                passwordEditText.requestFocus()
+                return@setOnClickListener
+            }
+
+            signUpWithEmail(email, password, username)
         }
 
         cancelSignUpButton.setOnClickListener {
@@ -43,36 +67,67 @@ class SignUpFragment : Fragment() {
         return view
     }
 
-    private fun signUpWithEmail(email: String, password: String) {
+    private fun signUpWithEmail(email: String, password: String, username: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    user?.sendEmailVerification()?.addOnCompleteListener { emailTask ->
-                        if (emailTask.isSuccessful) {
-                            Toast.makeText(
-                                context,
-                                "Sign-Up successful, check your email for verification.",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    val userId = user?.uid
+                    if (userId != null) {
+                        // Initialize Firestore instance
+                        val firestore = FirebaseFirestore.getInstance()
 
-                            // Sign out the user immediately after sending the verification email
-                            auth.signOut()
+                        // Create a map of user data
+                        val userMap = hashMapOf(
+                            "email" to email,
+                            "username" to username
+                        )
 
-                            // Navigate back to login page
-                            requireActivity().supportFragmentManager.popBackStack()
-                            requireActivity().findViewById<View>(R.id.login_layout).visibility =
-                                View.VISIBLE
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Failed to send verification email.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        // Save the user data in the Firestore "users" collection
+                        firestore.collection("users").document(userId)
+                            .set(userMap)
+                            .addOnCompleteListener { dbTask: Task<Void> ->
+                                if (dbTask.isSuccessful) {
+                                    // Send email verification
+                                    user.sendEmailVerification()
+                                        ?.addOnCompleteListener { emailTask: Task<Void> ->
+                                            if (emailTask.isSuccessful) {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Sign-Up successful, check your email for verification.",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+
+                                                // Sign out the user immediately after sending the verification email
+                                                auth.signOut()
+
+                                                // Navigate back to login page
+                                                requireActivity().supportFragmentManager.popBackStack()
+                                                requireActivity().findViewById<View>(R.id.login_layout).visibility =
+                                                    View.VISIBLE
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Failed to send verification email.",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Failed to save user data in Firestore.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                     }
                 } else {
-                    Toast.makeText(context, "Sign-Up failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Sign-Up failed: ${task.exception?.localizedMessage}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
