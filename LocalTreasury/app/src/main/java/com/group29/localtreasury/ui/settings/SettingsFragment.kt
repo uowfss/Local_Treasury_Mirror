@@ -65,7 +65,7 @@ class SettingsFragment : Fragment() {
             galleryApp()
         }
 
-//        val firebaseDatabase = FirebaseDatabase()
+        val firebaseDatabase = FirebaseDatabase()
 //        val chatObject = ChatObject()
 //        chatObject.user = "BG"
 //        chatObject.reciever = "Seller"
@@ -76,8 +76,15 @@ class SettingsFragment : Fragment() {
 //
 //        firebaseDatabase.createAccount("Birfatehjit@gmail.com","123456789")
 //
-//        firebaseDatabase.signIn("Birfatehjit@gmail.com","123456789")
+//
 
+        firebaseDatabase.signIn("Birfatehjit@gmail.com","123456789") { userId ->
+            if (userId != null) {
+                //Login
+            } else {
+                // Wrong Credintels
+            }
+        }
         return root
     }
 
