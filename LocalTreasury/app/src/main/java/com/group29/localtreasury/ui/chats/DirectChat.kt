@@ -68,10 +68,11 @@ class DirectChat : AppCompatActivity() {
                 var tempChat = chatsViewModel.singleChat?.value
                 Log.d("BG",messageText)
 
-                if(tempChat != null){
+                if(tempChat!!.senderID != ""){
                     Log.d("BG","notNull")
                     tempChat.messages.add(messageText)
                     firebase.sendMessage(tempChat)
+                    sendLine.setText("")
                 }else{
                     Log.d("BG","Null")
                     var chat = ChatObject()
@@ -81,6 +82,8 @@ class DirectChat : AppCompatActivity() {
                     chat.participants.add(recieverID)
                     chat.messages.add(messageText)
                     firebase.sendMessage(chat)
+                    sendLine.setText("")
+
                 }
 
             }
