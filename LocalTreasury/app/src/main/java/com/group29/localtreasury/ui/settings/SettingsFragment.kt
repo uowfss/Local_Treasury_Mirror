@@ -15,12 +15,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.logging.type.LogSeverityProto
 import com.group29.localtreasury.R
 import com.group29.localtreasury.Util
 import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
 import com.group29.localtreasury.databinding.FragmentSettingsBinding
+import com.group29.localtreasury.ui.chats.DirectChat
 
 class SettingsFragment : Fragment() {
 
@@ -29,6 +31,7 @@ class SettingsFragment : Fragment() {
     private lateinit var galleryResult: ActivityResultLauncher<Intent>
     private lateinit var settingsViewModel: SettingsViewModel
     private lateinit var imageView: ImageView
+    private lateinit var userName: TextView
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -65,26 +68,19 @@ class SettingsFragment : Fragment() {
             galleryApp()
         }
 
-        val firebaseDatabase = FirebaseDatabase()
-//        val chatObject = ChatObject()
-//        chatObject.user = "BG"
-//        chatObject.reciever = "Seller"
-//        chatObject.chatList.add("Hi")
-//        chatObject.chatList.add("bye")
-//        firebaseDatabase.adddata(chatObject)
-//        firebaseDatabase.getChats()
-//
-//        firebaseDatabase.createAccount("Birfatehjit@gmail.com","123456789")
-//
-//
+        userName = binding.UsernamePlaceholder
+        val firebase = FirebaseDatabase()
 
-        firebaseDatabase.signIn("Birfatehjit@gmail.com","123456789") { userId ->
-            if (userId != null) {
-                //Login
-            } else {
-                // Wrong Credintels
+        firebase.getUsername(FirebaseAuth.getInstance().getCurrentUser()!!.getUid()){ username ->
+            if(username != null){
+                userName.text = username
             }
+
         }
+
+
+
+
         return root
     }
 
