@@ -176,6 +176,7 @@ class FirebaseDatabase {
                     val chatObject = snapshot.toObject(ChatObject::class.java)
                     callback(chatObject)
                 } else {
+
                     callback(null)
                 }
             }

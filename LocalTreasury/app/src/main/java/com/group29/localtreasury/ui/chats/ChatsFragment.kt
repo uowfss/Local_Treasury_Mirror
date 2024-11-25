@@ -9,6 +9,7 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
 import com.group29.localtreasury.databinding.FragmentChatsBinding
@@ -20,7 +21,7 @@ class ChatsFragment : Fragment() {
     private val binding get() = _binding!!
 
     //val userID = "12345"
-    val userID = "nvTXLr0gppdYaWHS7TmX5BoNnf83"
+    var userID = ""
 
     private lateinit var chatsViewModel: ChatsViewModel
     private lateinit var chatActivityAdapter : AllChatsArrayAdaptor
@@ -33,6 +34,7 @@ class ChatsFragment : Fragment() {
     ): View {
         chatsViewModel = ChatsViewModel.getInstance(requireActivity().application)
 
+        userID = FirebaseAuth.getInstance().getCurrentUser()!!.getUid()
         val firebase = FirebaseDatabase()
 
         _binding = FragmentChatsBinding.inflate(inflater, container, false)
@@ -52,9 +54,7 @@ class ChatsFragment : Fragment() {
             else{
                 recieverID = allChats[position].recieverID
             }
-            recieverID = "123456789"
             val intent = Intent(activity,DirectChat::class.java)
-            intent.putExtra("USERID", userID)
             intent.putExtra("RECIEVERID", recieverID)
             startActivity(intent)
 

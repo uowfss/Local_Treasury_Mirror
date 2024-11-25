@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.group29.localtreasury.R
 import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
@@ -40,8 +41,14 @@ class DirectChat : AppCompatActivity() {
 
         chatsViewModel = ChatsViewModel.getInstance(application)
 
-        userID = intent.getStringExtra("USERID")!!
-        recieverID = intent.getStringExtra("RECIEVERID")!!
+        userID = FirebaseAuth.getInstance().getCurrentUser()!!.getUid()
+
+        if(savedInstanceState != null){
+            recieverID = savedInstanceState.getString("RECIEVERID")!!
+        }
+        else{
+            recieverID = intent.getStringExtra("RECIEVERID")!!
+        }
 
         val firebase = FirebaseDatabase()
 
@@ -115,6 +122,7 @@ class DirectChat : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("RECIEVERID",recieverID)
         super.onSaveInstanceState(outState)
     }
 }

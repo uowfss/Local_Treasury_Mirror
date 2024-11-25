@@ -2,6 +2,7 @@ package com.group29.localtreasury
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -19,7 +20,6 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_login)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login_layout)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -57,12 +57,12 @@ class LoginActivity : AppCompatActivity() {
         super.onStart()
         /**
         // Check if user is signed in (non-null) and update UI accordingly.
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            // If the user is already signed in, navigate to the main activity
-            navigateToMainActivity()
-        }
-        **/
+//        val currentUser = auth.currentUser
+//        if (currentUser != null) {
+//            // If the user is already signed in, navigate to the main activity
+//            Log.d("BG",currentUser.getUid())
+//            navigateToMainActivity()
+//        }
     }
 
 
