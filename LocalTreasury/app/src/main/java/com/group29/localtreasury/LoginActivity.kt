@@ -52,15 +52,19 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+
     public override fun onStart() {
         super.onStart()
+        /**
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
         if (currentUser != null) {
             // If the user is already signed in, navigate to the main activity
             navigateToMainActivity()
         }
+        **/
     }
+
 
     private fun loginWithEmail(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
