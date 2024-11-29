@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentTransaction
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
 
@@ -69,20 +70,52 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    //login successful, will go to main activity
                     val user = auth.currentUser
                     if (user != null && user.isEmailVerified) {
-                        // Email is verified
-                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                        navigateToMainActivity()
+                        // Check if the user profile is complete in Firestore
+                        val userId = user.uid
+                        val firestore = FirebaseFirestore.getInstance()
+
+                        firestore.collection("users").document(userId)
+                            .get()
+                            .addOnSuccessListener { document ->
+                                if (document.exists() &&
+                                    document.contains("firstName") &&
+                                    document.contains("lastName")) {
+                                    // Profile is complete; proceed to main activity
+                                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                                    navigateToMainActivity()
+                                } else {
+                                    // Profile is incomplete; show UserDetailsDialogFragment
+                                    Toast.makeText(
+                                        this,
+                                        "Please complete your profile details.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+
+                                    val dialog = UserDetailDialog()
+                                    val bundle = Bundle()
+                                    bundle.putString("USER_ID", userId)
+                                    bundle.putBoolean("FROM_SIGNUP", false)
+                                    dialog.arguments = bundle
+                                    dialog.show(supportFragmentManager, "UserDetailsDialogFragment")
+                                }
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(
+                                    this,
+                                    "Failed to fetch user details. Please try again.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                     } else {
                         // Email is not verified
                         Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show()
                         auth.signOut() // Sign out the user to prevent an unverified session
                     }
                 } else {
-                    //login failed, stay in login activity
-                    Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show()
+                    // Login failed
+                    Toast.makeText(this, "Login failed: ${task.exception?.localizedMessage}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
