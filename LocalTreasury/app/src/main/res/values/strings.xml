@@ -3,6 +3,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_settings">Settings</string>
+    <string name="title_add_post">Add listing</string>
     <string name="title_chats">Chats</string>
     <string name="title_notifications">Notifications</string>
     <string name="login_title">Local Treasury</string>
