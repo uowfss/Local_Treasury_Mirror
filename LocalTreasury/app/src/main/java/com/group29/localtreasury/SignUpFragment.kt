@@ -88,6 +88,14 @@ class SignUpFragment : Fragment() {
                             .set(userMap)
                             .addOnCompleteListener { dbTask: Task<Void> ->
                                 if (dbTask.isSuccessful) {
+                                    // Open the UserDetailsDialogFragment
+                                    val dialog = UserDetailDialog()
+                                    val bundle = Bundle()
+                                    bundle.putString("USER_ID", userId)
+                                    bundle.putBoolean("FROM_SIGNUP", true)
+                                    dialog.arguments = bundle
+                                    dialog.show(requireActivity().supportFragmentManager, "UserDetailsDialogFragment")
+
                                     // Send email verification
                                     user.sendEmailVerification()
                                         ?.addOnCompleteListener { emailTask: Task<Void> ->
