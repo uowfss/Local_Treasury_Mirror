@@ -65,7 +65,10 @@ class SettingsFragment : Fragment() {
         }
 
         imageView.setOnClickListener(){
-            galleryApp()
+            val intent = Intent(activity,DirectChat::class.java)
+            intent.putExtra("RECIEVERID", "o95kzdINL6buVAut0Lcy0KcHRkN2")
+            startActivity(intent)
+            //galleryApp()
         }
 
         userName = binding.UsernamePlaceholder

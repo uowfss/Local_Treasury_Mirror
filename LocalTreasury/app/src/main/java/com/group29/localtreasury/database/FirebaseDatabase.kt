@@ -95,7 +95,7 @@ class FirebaseDatabase {
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
                     val postRef = db.collection("posts").document(postId)
-                    postRef.update("ImageURL", uri.toString())
+                    postRef.update("imageURL", uri.toString())
                 }
             }
 
