@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
@@ -95,7 +96,7 @@ class FirebaseDatabase {
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
                     val postRef = db.collection("posts").document(postId)
-                    postRef.update("ImageURL", uri.toString())
+                    postRef.update("imageURL", uri.toString())
                 }
             }
 
@@ -103,9 +104,8 @@ class FirebaseDatabase {
 
     // Returns the list of ItemPostsObject
     // Simular to the signin needs a callback function
-    fun getUserPosts(userId: String, callback: (List<ItemPostObject>) -> Unit) {
+    fun getUserPosts(callback: (List<ItemPostObject>) -> Unit) {
         db.collection("posts")
-            .whereEqualTo("sellerID", userId)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
                     return@addSnapshotListener
@@ -207,6 +207,26 @@ class FirebaseDatabase {
             }
             .addOnFailureListener { exception ->
                 callback(null)
+            }
+    }
+
+    fun getAccountDetails(ID:String,callback: (String?, String?,String?) -> Unit){
+        val users = db.collection("users").document(ID)
+        users.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val username = document.getString("username")
+                    val addressMap = document.get("address") as? Map<String, String>
+                    val address = addressMap?.let { "${it["line1"]}, ${it["city"]}" }
+                    val firstName = document.getString("firstName")
+                    val lastName = document.getString("lastName")
+                    callback(username,address,"$firstName $lastName")
+                } else {
+                    callback(null,null,null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                callback(null,null,null)
             }
     }
 

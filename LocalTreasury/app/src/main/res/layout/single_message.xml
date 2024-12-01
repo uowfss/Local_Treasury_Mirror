@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/message"
-        android:textSize="20sp">
+        android:textSize="20sp"
+        android:paddingStart="10dp">
 
     </TextView>
 
