@@ -103,9 +103,8 @@ class FirebaseDatabase {
 
     // Returns the list of ItemPostsObject
     // Simular to the signin needs a callback function
-    fun getUserPosts(userId: String, callback: (List<ItemPostObject>) -> Unit) {
+    fun getUserPosts(callback: (List<ItemPostObject>) -> Unit) {
         db.collection("posts")
-            .whereEqualTo("sellerID", userId)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
                     return@addSnapshotListener
