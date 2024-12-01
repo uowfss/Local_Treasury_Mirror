@@ -35,11 +35,11 @@ class ChatArrayAdapter(
         var parsedMessage = messageList[position].split("(:::)")
         val combinedMessage = parsedMessage.drop(1).joinToString("")
         if(userID == parsedMessage[0]){
-            message.setBackgroundColor(ContextCompat.getColor(context, R.color.lightBlue))
+            message.setBackgroundColor(ContextCompat.getColor(context, R.color.UserChat))
 
         }
         else{
-            message.setBackgroundColor(ContextCompat.getColor(context, R.color.purple_200))
+            message.setBackgroundColor(ContextCompat.getColor(context, R.color.OtherChat))
         }
         message.text = combinedMessage
 

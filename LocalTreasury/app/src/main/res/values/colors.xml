@@ -9,6 +9,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="lightBlue">#9AFDF1</color>
 
-    <color name="oddChat">#009CB3</color>
-    <color name="evenChat">#00BFDC</color>
+    <color name="UserChat">#FFDBE0</color>
+    <color name="OtherChat">#FFBAC2</color>
+    <color name="topBackground">#C4AAFF</color>
+    <color name="background">#FFEBEE</color>
+    <color name="appbackground">#FFF3F5</color>
+    <color name="ItemListingBackground">#FFBB86FC</color>
+    <color name="HeadingText">#000000</color>
+    <color name="Text">#000000</color>
 </resources>

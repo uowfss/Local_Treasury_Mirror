@@ -2,6 +2,7 @@ package com.group29.localtreasury
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -51,10 +52,11 @@ class SellDetailActivity : AppCompatActivity() {
             itemPriceTextView.text = it.itemPrice
             sellerID = it.sellerID
             // Load image using Glide
-//            Glide.with(this)
-//                .load(it.imageURL) // Placeholder image for now
-//                .placeholder(R.drawable.placeholder_image)
-//                .into(itemImageView)
+            Log.d("BGGlide", it.ImageURL)
+            Glide.with(this)
+                .load(it.ImageURL) // Placeholder image for now
+                .placeholder(R.drawable.placeholder_image)
+                .into(itemImageView)
 
             // Fetch seller details from Firestore
             fetchSellerDetails(it.sellerID)
@@ -71,12 +73,11 @@ class SellDetailActivity : AppCompatActivity() {
         }**/
 
         // Open Chat button
-        //TODO: link to chat page later
 
         chatButton.setOnClickListener {
             if(sellerID != ""){
                 val intent = Intent(this,DirectChat::class.java)
-                intent.putExtra("RECIEVERID", "12345") // Uses dummy reciever ID for now will checge to SellerID
+                intent.putExtra("RECIEVERID", sellerID)
                 startActivity(intent)
             }
         }

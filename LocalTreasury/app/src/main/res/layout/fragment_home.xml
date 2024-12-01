@@ -11,11 +11,39 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorPrimary"
-        android:titleTextColor="@android:color/white"
-        app:title="Local Treasures"
+        android:background="@color/topBackground"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Icon/Image -->
+            <ImageView
+                android:id="@+id/toolbar_logo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_home_black_24dp" />
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/toolbar_logo"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
+                android:text="Local Treasures"
+                android:textColor="@color/HeadingText"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
 
     <!-- RecyclerView for the List -->
     <androidx.recyclerview.widget.RecyclerView

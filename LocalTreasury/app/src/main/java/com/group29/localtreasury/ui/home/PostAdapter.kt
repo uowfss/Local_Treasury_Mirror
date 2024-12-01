@@ -38,7 +38,7 @@ class PostAdapter(private val posts: List<ItemPostObject>) :
 
 
         Glide.with(holder.itemView.context)
-            .load(post.imageURL)
+            .load(post.ImageURL)
             .centerCrop()
             .placeholder(R.drawable.placeholder_image)
             .into(holder.itemImage)

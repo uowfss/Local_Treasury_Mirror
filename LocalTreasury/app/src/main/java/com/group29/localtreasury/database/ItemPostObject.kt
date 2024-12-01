@@ -11,7 +11,7 @@ class ItemPostObject : Serializable {
     var itemDescription: String = ""
     var address: String = ""
     var latLng: LatLng? = null
-    var imageURL: String = ""
+    var ImageURL: String = ""
 }
 
 /*
