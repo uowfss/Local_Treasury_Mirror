@@ -1,5 +1,6 @@
 package com.group29.localtreasury
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -8,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.group29.localtreasury.ui.chats.DirectChat
 
 class SellDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,11 +49,12 @@ class SellDetailActivity : AppCompatActivity() {
 
         // Open Chat button
         //TODO: link to chat page later
-        /**
+
         openChatButton.setOnClickListener {
-            val chatIntent = Intent(this, ChatActivity::class.java)
-            startActivity(chatIntent)
-        }**/
+            val intent = Intent(this,DirectChat::class.java)
+            intent.putExtra("RECIEVERID", "12345") // Uses dummy reciever ID for now will checge to SellerID
+            startActivity(intent)
+        }
 
         // Cancel current selling page
         cancelSellingButton.setOnClickListener{

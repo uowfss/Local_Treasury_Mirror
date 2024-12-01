@@ -61,9 +61,14 @@ class DirectChat : AppCompatActivity() {
         deletebutton.setOnClickListener(){
             firebase.deleteChat(userID,recieverID){ isDeleted ->
                 if(isDeleted){
+                    var tempChat = chatsViewModel.singleChat?.value
+                    tempChat!!.messages = mutableListOf()
+                    chatsViewModel.singleChat.value = tempChat
                     finish()
                 }
             }
+
+
         }
 
 
@@ -108,7 +113,9 @@ class DirectChat : AppCompatActivity() {
                 chatsViewModel.updateChat(chat)
                 Log.d("BG","ChatFound")
             }else{
-                Log.d("BG","ChatNotFound")
+                var tempChat = chatsViewModel.singleChat?.value
+                tempChat!!.messages = mutableListOf()
+                chatsViewModel.singleChat.value = tempChat
             }
         }
 
