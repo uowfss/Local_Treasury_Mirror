@@ -1,16 +1,17 @@
 package com.group29.localtreasury.database
 
 import com.google.type.LatLng
+import java.io.Serializable
 
-class ItemPostObject {
+class ItemPostObject : Serializable {
     var PostID: String = ""
     var sellerID: String = ""
     var itemName: String = ""
     var itemPrice: String = ""
     var itemDescription: String = ""
     var address: String = ""
-    lateinit var latLng: LatLng
-    var ImageURL: String = ""
+    var latLng: LatLng? = null
+    var imageURL: String = ""
 }
 
 /*

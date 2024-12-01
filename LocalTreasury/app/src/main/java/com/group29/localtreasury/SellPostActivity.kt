@@ -16,15 +16,25 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.Manifest
+import android.content.ContentResolver
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.firebase.auth.FirebaseAuth
+import com.group29.localtreasury.database.FirebaseDatabase
+import com.group29.localtreasury.database.ItemPostObject
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 
 class SellPostActivity : AppCompatActivity() {
 
     private lateinit var itemImageView: ImageView
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
+    private var selectedImageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,22 +51,30 @@ class SellPostActivity : AppCompatActivity() {
         val postItemButton = findViewById<Button>(R.id.submit_post_btn)
         val cancelPostButton = findViewById<Button>(R.id.cancel_post_btn)
 
-        val sellerNameEditText = findViewById<EditText>(R.id.post_owner_textBox)
-        val sellerAddressEditText = findViewById<EditText>(R.id.post_address_textBox)
-        val sellerPhoneEditText = findViewById<EditText>(R.id.owner_phone_textBox)
+        val item_name = findViewById<EditText>(R.id.item_name_textBox)
+        val item_description = findViewById<EditText>(R.id.item_description_textBox)
+        val item_price = findViewById<EditText>(R.id.item_price_textBox)
+        val item_pickup_addr = findViewById<EditText>(R.id.pickup_addr_textBox)
 
         // Initialize launchers
         cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val imageBitmap = result.data?.extras?.get("data") as Bitmap
                 itemImageView.setImageBitmap(imageBitmap)
+                // TODO: Save the bitmap to URI if needed
             }
         }
-
+        // Initialize the gallery launcher
         galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val imageUri: Uri? = result.data?.data
-                itemImageView.setImageURI(imageUri)
+                selectedImageUri = result.data?.data
+                if (selectedImageUri != null) {
+                    // Resize the selected image to match the ImageView dimensions
+                    val resizedBitmap = resizeImageToImageView(selectedImageUri!!)
+                    itemImageView.setImageBitmap(resizedBitmap) // Set the resized image
+                } else {
+                    Toast.makeText(this, "Failed to select image", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -74,13 +92,30 @@ class SellPostActivity : AppCompatActivity() {
         }
 
         postItemButton.setOnClickListener {
-            val name = sellerNameEditText.text.toString()
-            val address = sellerAddressEditText.text.toString()
-            val phone = sellerPhoneEditText.text.toString()
+            val item_Name = item_name.text.toString()
+            val item_Descrip = item_description.text.toString()
+            val item_Price = item_price.text.toString()
+            val addr = item_pickup_addr.text.toString()
 
-            if (name.isNotEmpty() && address.isNotEmpty() && phone.isNotEmpty()) {
-                // TODO: Post item logic (save to database or backend)
-                Toast.makeText(this, "Item posted successfully", Toast.LENGTH_SHORT).show()
+            if (item_Name.isNotEmpty() && item_Descrip.isNotEmpty() && item_Price.isNotEmpty() && addr.isNotEmpty()) {
+                val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
+                val localFile = copyUriToLocalFile(this, selectedImageUri!!)
+                if (currentUserID != null) {
+                    val itemPost = ItemPostObject().apply {
+                        sellerID = currentUserID
+                        itemName = item_Name
+                        itemPrice = item_Price
+                        itemDescription = item_Descrip
+                        address = addr
+                        // latLng is left empty for now
+                    }
+                    FirebaseDatabase().createPost(itemPost, Uri.fromFile(localFile)) // Upload the post
+                    //localFile?.delete()
+                    Toast.makeText(this, "Item posted successfully", Toast.LENGTH_SHORT).show()
+                    finish() // Close the activity
+                } else {
+                    Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show()
             }
@@ -88,6 +123,39 @@ class SellPostActivity : AppCompatActivity() {
 
         cancelPostButton.setOnClickListener {
             finish() // Go back to the previous activity
+        }
+    }
+
+    // Helper function to resize the image to fit within the ImageView dimensions
+    private fun resizeImageToImageView(imageUri: Uri): Bitmap? {
+        val inputStream = contentResolver.openInputStream(imageUri) ?: return null
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream.close()
+
+        // Get the target dimensions from the ImageView
+        val targetWidth = resources.getDimensionPixelSize(R.dimen.image_view_width) // Convert 150dp to pixels
+        val targetHeight = resources.getDimensionPixelSize(R.dimen.image_view_height) // Convert 150dp to pixels
+
+        // Scale the bitmap to fit the ImageView dimensions
+        return Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, true)
+    }
+
+    // Helper function to copy URI to app cache
+    private fun copyUriToLocalFile(context: Context, uri: Uri): File? {
+        try {
+            val contentResolver: ContentResolver = context.contentResolver
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            val tempFile = File.createTempFile("temp_image", ".jpg", context.cacheDir)
+            val outputStream = FileOutputStream(tempFile)
+
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+
+            return tempFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
         }
     }
 
