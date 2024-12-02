@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -25,6 +26,7 @@ class SellDetailActivity : AppCompatActivity() {
     private lateinit var itemDescriptionTextView: TextView
     private lateinit var itemPriceTextView: TextView
     private lateinit var chatButton : Button
+    private lateinit var openMapButton : Button
     private var sellerID = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +43,7 @@ class SellDetailActivity : AppCompatActivity() {
         itemPriceTextView = findViewById(R.id.textView13)
         val cancelSellingButton = findViewById<Button>(R.id.cancel_selling_btn)
         chatButton = findViewById(R.id.chat_page_btn)
+        openMapButton = findViewById(R.id.show_map_btn)
 
         // Get the ItemPostObject passed from HomeFragment
         val itemPost = intent.getSerializableExtra("itemPost") as? ItemPostObject
@@ -63,14 +66,15 @@ class SellDetailActivity : AppCompatActivity() {
         }
 
         // Open Map button
-        //TODO: modify map using passed address later
-        /**
         openMapButton.setOnClickListener {
-            val geoUri = Uri.parse("geo:0,0?q=Your+Selling+Location")
-            val mapIntent = Intent(Intent.ACTION_VIEW, geoUri)
-            mapIntent.setPackage("com.google.android.apps.maps")
-            startActivity(mapIntent)
-        }**/
+            if (sellerAddressTextView.text.isNotEmpty()) {
+                val intent = Intent(this, MapActivity::class.java)
+                intent.putExtra("ITEM_ADDRESS", sellerAddressTextView.text.toString())
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Seller address not available", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // Open Chat button
 
