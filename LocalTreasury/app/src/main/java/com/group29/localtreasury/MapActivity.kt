@@ -20,6 +20,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import android.Manifest
+import android.net.Uri
+import android.util.Log
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -27,9 +32,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var etAddress: EditText
     private lateinit var btnSearch: Button
-    private var userAddress: String? = null
-    private var destinationAddress: String? = null
     private var currentLocationMarker: Marker? = null
+    private var itemLocationMarker: Marker? = null
+    private var itemAddress: String? = ""
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,24 +42,31 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         enableEdgeToEdge()
         setContentView(R.layout.activity_map)
 
-        etAddress = findViewById(R.id.et_address)
-        btnSearch = findViewById(R.id.btn_search)
+        // Define a variable to hold the Places API key.
+        val apiKey = BuildConfig.PLACES_API_KEY
+
+        // Log an error if apiKey is not set.
+        if (apiKey.isEmpty() || apiKey == "DEFAULT_API_KEY") {
+            Log.e("Places test", "No api key")
+            finish()
+            return
+        }
+
+        // Initialize the SDK
+        Places.initializeWithNewPlacesApiEnabled(applicationContext, apiKey)
+        
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // Request location permissions
-        requestLocationPermission()
+        // Retrieve item address from Intent
+        itemAddress = intent.getStringExtra("ITEM_ADDRESS")
 
-        btnSearch.setOnClickListener {
-            val address = etAddress.text.toString()
-            if (address.isNotEmpty()) {
-                destinationAddress = address
-                handleNavigationOrFallback(address)
-            } else {
-                Toast.makeText(this, "Please enter an address", Toast.LENGTH_SHORT).show()
-            }
+        if (isGoogleMapsInstalled()) {
+            launchGoogleMapsNavigation()
+        } else {
+            requestLocationPermission()
         }
     }
 
@@ -63,7 +75,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                getUserAddress()
+                displayLocations()
             } else {
                 Toast.makeText(this, "Location permission is required for this app", Toast.LENGTH_LONG).show()
             }
@@ -72,36 +84,79 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
-            getUserAddress()
+            displayLocations()
         }
     }
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
+        displayLocations()
     }
 
-    private fun getUserAddress() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    userAddress = "Your Current Location" // Placeholder for user address
-                    val userLatLng = LatLng(location.latitude, location.longitude)
-                    currentLocationMarker = googleMap.addMarker(
-                        MarkerOptions().position(userLatLng).title(userAddress)
-                    )
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 15f))
-                } else {
-                    Toast.makeText(this, "Unable to fetch location", Toast.LENGTH_SHORT).show()
-                }
-            }
+    private fun launchGoogleMapsNavigation() {
+        if (itemAddress.isNullOrEmpty()) {
+            Toast.makeText(this, "Item address not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = "google.navigation:q=${itemAddress!!.replace(" ", "+")}"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri)).apply {
+            setPackage("com.google.android.apps.maps")
+        }
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Unable to launch Google Maps", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun handleNavigationOrFallback(address: String) {
-        if (isGoogleMapsInstalled()) {
-            startNavigationToAddress(address)
-        } else {
-            showAddressOnMap(address)
+    private fun displayLocations() {
+        val localItemAddress: String = itemAddress ?: ""
+        if (itemAddress.isNullOrEmpty()) {
+            Toast.makeText(this, "Item address not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Get user's current location
+            fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val userLatLng = LatLng(location.latitude, location.longitude)
+                    currentLocationMarker = googleMap.addMarker(
+                        MarkerOptions().position(userLatLng).title("Your Location")
+                    )
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12f))
+                }
+            }
+
+            // Use Places API to find the item's location
+            val placesClient = Places.createClient(this)
+            val request = FindCurrentPlaceRequest.newInstance(listOf(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME))
+
+            placesClient.findCurrentPlace(request).addOnSuccessListener { response ->
+                val foundPlace = response.placeLikelihoods.firstOrNull { it.place.name?.contains(localItemAddress, ignoreCase = true) == true }
+
+                if (foundPlace != null) {
+                    val itemLatLng = foundPlace.place.latLng
+                    if (itemLatLng != null) {
+                        itemLocationMarker = googleMap.addMarker(
+                            MarkerOptions()
+                                .position(itemLatLng)
+                                .title("Item Location")
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                        )
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(itemLatLng, 12f))
+                    } else {
+                        Toast.makeText(this, "Unable to determine item's location", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "Item address not found using Places API", Toast.LENGTH_SHORT).show()
+                }
+            }.addOnFailureListener {
+                Toast.makeText(this, "Places API failed to retrieve location", Toast.LENGTH_SHORT).show()
+            }
+
+            startLocationUpdates()
         }
     }
 
@@ -112,45 +167,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         } catch (e: PackageManager.NameNotFoundException) {
             false
         }
-    }
-
-    private fun startNavigationToAddress(address: String) {
-        val uri = "google.navigation:q=${address.replace(" ", "+")}"
-        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(uri)).apply {
-            setPackage("com.google.android.apps.maps")
-        }
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            Toast.makeText(this, "Google Maps not installed", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun showAddressOnMap(address: String) {
-        googleMap.clear()
-
-        if (userAddress != null) {
-            // Add user's location marker
-            currentLocationMarker?.let {
-                googleMap.addMarker(
-                    MarkerOptions()
-                        .position(it.position)
-                        .title(userAddress)
-                )
-            }
-        }
-
-        // Add destination marker as plain text
-        val marker = MarkerOptions()
-            .title(address)
-            .snippet("Destination")
-            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-            .position(googleMap.cameraPosition.target) // Assuming it's centered at the map location
-        googleMap.addMarker(marker)
-
-        Toast.makeText(this, "Displaying markers for current location and destination.", Toast.LENGTH_SHORT).show()
-
-        startLocationUpdates()
     }
 
     private fun startLocationUpdates() {
