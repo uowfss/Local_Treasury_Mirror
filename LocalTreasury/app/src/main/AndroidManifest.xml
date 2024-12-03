@@ -33,11 +33,7 @@
             android:name=".ui.chats.DirectChat"
             android:exported="false"
             android:theme="@style/Base.Theme.LocalTreasury"/>
-        <activity
-            android:name=".ui.TestActivity"
-            android:exported="true"
-            android:theme="@style/Base.Theme.LocalTreasury">
-        </activity>
+
         <activity
             android:name=".MainActivity"
             android:exported="false"

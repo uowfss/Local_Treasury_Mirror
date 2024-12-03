@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import com.group29.localtreasury.R
 import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
@@ -72,14 +71,6 @@ class AllChatsArrayAdaptor (
             }
         }
         lastmessage.text = lastText
-//        if(position % 2 == 0){
-//            usernameTextView.setBackgroundColor(ContextCompat.getColor(context, R.color.evenChat))
-//            lastmessage.setBackgroundColor(ContextCompat.getColor(context, R.color.evenChat))
-//        }
-//        else{
-//            usernameTextView.setBackgroundColor(ContextCompat.getColor(context, R.color.oddChat))
-//            lastmessage.setBackgroundColor(ContextCompat.getColor(context, R.color.oddChat))
-//        }
         return view
     }
     //Updates the list
