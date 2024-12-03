@@ -1,4 +1,4 @@
 # Local_Treasury
 CMPT362 Final Project
 
-trial edit from George
+You need to click the upload button again after chosing a profile image to upload it to the firebase.
