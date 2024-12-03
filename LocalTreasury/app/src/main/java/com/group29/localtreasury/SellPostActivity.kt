@@ -56,14 +56,29 @@ class SellPostActivity : AppCompatActivity() {
         val item_price = findViewById<EditText>(R.id.item_price_textBox)
         val item_pickup_addr = findViewById<EditText>(R.id.pickup_addr_textBox)
 
-        // Initialize launchers
+        // Initialize the camera launcher
         cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
+                // Get the captured image as a Bitmap
                 val imageBitmap = result.data?.extras?.get("data") as Bitmap
-                itemImageView.setImageBitmap(imageBitmap)
-                // TODO: Save the bitmap to URI if needed
+
+                // Save the bitmap to a temporary file and get its URI
+                val tempFile = saveBitmapToFile(imageBitmap)
+                selectedImageUri = Uri.fromFile(tempFile)
+
+                // Resize the saved image to fit the ImageView dimensions
+                val resizedBitmap = resizeImageToImageView(selectedImageUri!!)
+                if (resizedBitmap != null) {
+                    itemImageView.setImageBitmap(resizedBitmap) // Display the resized image
+                } else {
+                    Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
             }
         }
+
+
         // Initialize the gallery launcher
         galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -158,6 +173,16 @@ class SellPostActivity : AppCompatActivity() {
             return null
         }
     }
+
+    private fun saveBitmapToFile(bitmap: Bitmap): File {
+        val tempFile = File.createTempFile("camera_image", ".jpg", cacheDir)
+        val outputStream = FileOutputStream(tempFile)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        outputStream.flush()
+        outputStream.close()
+        return tempFile
+    }
+
 
     private fun checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)

@@ -97,8 +97,10 @@ class SellDetailActivity : AppCompatActivity() {
         db.collection("users").document(sellerID).get()
             .addOnSuccessListener { document ->
                 if (document != null) {
+                    // Set seller details
                     sellerFirstNameTextView.text = document.getString("firstName")
                     sellerLastNameTextView.text = document.getString("lastName")
+
                     // Fetch and format address
                     val addressMap = document.get("address") as? Map<*, *>
                     if (addressMap != null) {
@@ -108,7 +110,26 @@ class SellDetailActivity : AppCompatActivity() {
                     } else {
                         sellerAddressTextView.text = "Address not available"
                     }
+
+                    // Fetch and display the profile image
+                    val profileImageUrl = document.getString("profileImageUrl")
+                    if (profileImageUrl != null && profileImageUrl.isNotEmpty()) {
+                        Glide.with(this)
+                            .load(profileImageUrl)
+                            .placeholder(R.drawable.profiledefault) // Default image if loading fails
+                            .centerCrop()
+                            .into(findViewById(R.id.profile_imageView))
+                    } else {
+                        // If no profile image is available, set the default image
+                        findViewById<ImageView>(R.id.profile_imageView).setImageResource(R.drawable.profiledefault)
+                    }
                 }
             }
+            .addOnFailureListener {
+                // Handle failure
+                Toast.makeText(this, "Failed to fetch seller details", Toast.LENGTH_SHORT).show()
+                findViewById<ImageView>(R.id.profile_imageView).setImageResource(R.drawable.profiledefault)
+            }
     }
+
 }

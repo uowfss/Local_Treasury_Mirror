@@ -104,21 +104,30 @@ class FirebaseDatabase {
 
     // Returns the list of ItemPostsObject
     // Simular to the signin needs a callback function
-    fun getUserPosts(callback: (List<ItemPostObject>) -> Unit) {
-        db.collection("posts")
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    return@addSnapshotListener
-                }
+    fun getUserPosts(searchQuery: String? = null, callback: (List<ItemPostObject>) -> Unit) {
+        val query = if (searchQuery.isNullOrEmpty()) {
+            db.collection("posts") // Fetch all posts
+        } else {
+            db.collection("posts")
+                .whereGreaterThanOrEqualTo("itemName", searchQuery)
+                .whereLessThanOrEqualTo("itemName", searchQuery + "\uf8ff") // Case-insensitive search
+        }
 
-                if (snapshot != null && !snapshot.isEmpty) {
-                    val updatedPosts = snapshot.documents.mapNotNull { it.toObject(ItemPostObject::class.java) }
-                    callback(updatedPosts)
-                } else {
-                    callback(emptyList())
-                }
+        query.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                callback(emptyList())
+                return@addSnapshotListener
             }
+
+            if (snapshot != null && !snapshot.isEmpty) {
+                val updatedPosts = snapshot.documents.mapNotNull { it.toObject(ItemPostObject::class.java) }
+                callback(updatedPosts)
+            } else {
+                callback(emptyList())
+            }
+        }
     }
+
 
     // Adds the message to the chat
     fun sendMessage(chatMessage: ChatObject) {
