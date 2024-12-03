@@ -34,7 +34,7 @@
                 android:layout_toEndOf="@id/toolbar_logo"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="8dp"
-                android:text="ACTIVE CHATS"
+                android:text="Settings"
                 android:textColor="@color/HeadingText"
                 android:textSize="25sp"
                 android:textStyle="bold" />
