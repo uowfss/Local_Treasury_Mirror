@@ -4,15 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.group29.localtreasury.ui.chats.DirectChat
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.group29.localtreasury.database.ItemPostObject
 
@@ -27,6 +30,7 @@ class SellDetailActivity : AppCompatActivity() {
     private lateinit var itemPriceTextView: TextView
     private lateinit var chatButton : Button
     private lateinit var openMapButton : Button
+    private lateinit var deleteItemButton: Button
     private var sellerID = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +48,7 @@ class SellDetailActivity : AppCompatActivity() {
         val cancelSellingButton = findViewById<Button>(R.id.cancel_selling_btn)
         chatButton = findViewById(R.id.chat_page_btn)
         openMapButton = findViewById(R.id.show_map_btn)
+        deleteItemButton = findViewById(R.id.delete_item_btn)
 
         // Get the ItemPostObject passed from HomeFragment
         val itemPost = intent.getSerializableExtra("itemPost") as? ItemPostObject
@@ -90,6 +95,13 @@ class SellDetailActivity : AppCompatActivity() {
         cancelSellingButton.setOnClickListener{
             finish()
         }
+
+        // Delete item button
+        deleteItemButton.setOnClickListener {
+            itemPost?.let { post ->
+                showDeleteConfirmationDialog(post.PostID, post.sellerID)
+            }
+        }
     }
 
     private fun fetchSellerDetails(sellerID: String) {
@@ -129,6 +141,72 @@ class SellDetailActivity : AppCompatActivity() {
                 // Handle failure
                 Toast.makeText(this, "Failed to fetch seller details", Toast.LENGTH_SHORT).show()
                 findViewById<ImageView>(R.id.profile_imageView).setImageResource(R.drawable.profiledefault)
+            }
+    }
+
+    private fun showDeleteConfirmationDialog(postID: String, sellerID: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_post, null)
+        val emailEditText = dialogView.findViewById<EditText>(R.id.delete_email_text)
+        val passwordEditText = dialogView.findViewById<EditText>(R.id.delete_password_text)
+
+        AlertDialog.Builder(this)
+            .setTitle("Confirm Deletion")
+            .setView(dialogView)
+            .setPositiveButton("Confirm") { dialog, _ ->
+                val email = emailEditText.text.toString().trim()
+                val password = passwordEditText.text.toString().trim()
+
+                if (email.isNotEmpty() && password.isNotEmpty()) {
+                    verifyCredentialsWithFirebase(email, password, sellerID) { isVerified ->
+                        if (isVerified) {
+                            deleteItem(postID) // Proceed with deletion
+                        } else {
+                            Toast.makeText(this, "Invalid email, password, or permission denied", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun verifyCredentialsWithFirebase(
+        email: String,
+        password: String,
+        sellerID: String,
+        callback: (Boolean) -> Unit
+    ) {
+        val auth = FirebaseAuth.getInstance()
+
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    if (user != null && user.uid == sellerID) {
+                        callback(true) // Verified successfully
+                    } else {
+                        callback(false) // Seller ID mismatch
+                    }
+                } else {
+                    callback(false) // Authentication failed
+                }
+            }
+    }
+
+    private fun deleteItem(itemId: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("posts").document(itemId).delete()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Item deleted successfully", Toast.LENGTH_SHORT).show()
+                finish() // Navigate back to the previous screen
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Failed to delete item", Toast.LENGTH_SHORT).show()
             }
     }
 
