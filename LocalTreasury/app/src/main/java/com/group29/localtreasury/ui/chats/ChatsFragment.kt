@@ -6,21 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
 import com.group29.localtreasury.databinding.FragmentChatsBinding
-import com.group29.localtreasury.databinding.FragmentDashboardBinding
-import com.group29.localtreasury.ui.dashboard.DashboardViewModel
 
 class ChatsFragment : Fragment() {
     private var _binding: FragmentChatsBinding? = null
     private val binding get() = _binding!!
 
-    //val userID = "12345"
     var userID = ""
 
     private lateinit var chatsViewModel: ChatsViewModel

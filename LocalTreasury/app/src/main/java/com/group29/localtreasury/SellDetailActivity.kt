@@ -60,7 +60,6 @@ class SellDetailActivity : AppCompatActivity() {
             itemPriceTextView.text = it.itemPrice
             sellerID = it.sellerID
             // Load image using Glide
-            Log.d("BGGlide", it.ImageURL)
             Glide.with(this)
                 .load(it.ImageURL) // Placeholder image for now
                 .placeholder(R.drawable.placeholder_image)

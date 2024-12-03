@@ -14,7 +14,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.group29.localtreasury.R
 import com.group29.localtreasury.database.ChatObject
 import com.group29.localtreasury.database.FirebaseDatabase
-import com.group29.localtreasury.database.Repository
 
 class DirectChat : AppCompatActivity() {
 
@@ -76,17 +75,14 @@ class DirectChat : AppCompatActivity() {
             var messageText = sendLine.text.toString().trim()
             messageText = userID + "(:::)" + messageText
             if(messageText != userID + "(:::)"){
-                Log.d("BG",messageText)
                 var tempChat = chatsViewModel.singleChat?.value
-                Log.d("BG",messageText)
+
 
                 if(tempChat!!.senderID != ""){
-                    Log.d("BG","notNull")
                     tempChat.messages.add(messageText)
                     firebase.sendMessage(tempChat)
                     sendLine.setText("")
                 }else{
-                    Log.d("BG","Null")
                     var chat = ChatObject()
                     chat.senderID = userID
                     chat.recieverID = recieverID
@@ -102,16 +98,12 @@ class DirectChat : AppCompatActivity() {
         }
 
         chatsViewModel.singleChat.observe(this){
-            Log.d("BG","ChatUPDate")
             chatActivityAdapter.updateChat(it!!.messages)
         }
 
         firebase.getUserChat(userID,recieverID){chat ->
-            Log.d("BG","Finding Chat")
             if(chat != null){
-                Log.d("BG",chat.senderID)
                 chatsViewModel.updateChat(chat)
-                Log.d("BG","ChatFound")
             }else{
                 var tempChat = chatsViewModel.singleChat?.value
                 tempChat!!.messages = mutableListOf()
