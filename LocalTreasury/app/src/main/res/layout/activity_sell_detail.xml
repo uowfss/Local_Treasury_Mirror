@@ -205,4 +205,12 @@
         app:layout_constraintTop_toBottomOf="@+id/seller_info"
         app:srcCompat="@drawable/profiledefault" />
 
+    <Button
+        android:id="@+id/delete_item_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DELETE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
